@@ -1,20 +1,22 @@
 <template>
 
-    <h1 class="page-header">Movies</h1>
-    <div class = "container">
-      <div v-for="(movie, index) in movies" :key="index" class="card">
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-4">
-              <img :src="movie.poster" class="card-img-top" alt="Movie Poster">
+    <div class="main-container">
+        <h1 class="page-header">Movies</h1>
+        <div class = "container">
+        <div v-for="(movie, index) in movies" :key="index" class="card">
+            <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                <img :src="movie.poster" class="card-img-top" alt="Movie Poster">
+                </div>
+                <div class="col-md-8">
+                <h5 class="card-title">{{ movie.title }}</h5>
+                <p class="card-text">{{ movie.description }}</p>
+                </div>
             </div>
-            <div class="col-md-8">
-              <h5 class="card-title">{{ movie.title }}</h5>
-              <p class="card-text">{{ movie.description }}</p>
             </div>
-          </div>
         </div>
-      </div>
+        </div>
     </div>
   </template>
   
@@ -82,7 +84,7 @@
     padding: 0px;
 }
 
-h1 {
+.main-container h1 {
     margin-left:70px;
     margin-bottom:15px;
 }
