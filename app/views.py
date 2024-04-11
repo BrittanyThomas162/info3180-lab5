@@ -5,10 +5,16 @@ Werkzeug Documentation:  https://werkzeug.palletsprojects.com/
 This file creates your application.
 """
 
-from app import app
-from flask import render_template, request, jsonify, send_file
+from app import app, db
+from flask import render_template, request, jsonify, send_file, url_for, flash, send_from_directory
 import os
 from app.models import Movie
+from werkzeug.utils import secure_filename
+from app.models import Movie
+from app.forms import MovieForm
+import jwt
+from flask_wtf.csrf import generate_csrf
+
 
 ###
 # Routing for your application.
@@ -17,6 +23,48 @@ from app.models import Movie
 @app.route('/')
 def index():
     return jsonify(message="This is the beginning of our API")
+
+@app.route('/api/v1/csrf-token', methods=['GET'])
+def get_csrf():
+    return jsonify({'csrf_token': generate_csrf()})
+
+@app.route('/api/v1/movies', methods=['POST'])
+def movies():
+    form = MovieForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        description = form.description.data
+        
+        poster = form.poster.data
+        filename = secure_filename(poster.filename)
+        poster.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        movie = Movie(title=title, description=description, poster=filename)
+        db.session.add(movie)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Movie Successfully added",
+            "title": title,
+            "poster": filename,
+            "description": description
+        }), 201
+    else:
+
+        errors = form_errors(form) 
+        return jsonify({"errors": errors}), 400
+
+
+def get_uploaded_images():
+    rootdir = app.config['UPLOAD_FOLDER']
+    photo_lst = []
+    for subdir, dirs, files in os.walk(rootdir):
+        for file in files:
+            if file.endswith(('.jpg', '.jpeg', '.png')):
+                photo_lst.append(file)
+    return photo_lst
+
 
 
 ###
