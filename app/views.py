@@ -55,6 +55,21 @@ def movies():
         return jsonify({"errors": errors}), 400
 
 
+@app.route('/api/v1/movies', methods=['GET'])
+def get_movies():
+    movies = Movie.query.all()
+    movie_list = []
+    for movie in movies:
+        movie_data = {
+            'id': movie.id,
+            'title': movie.title,
+            'description': movie.description,
+            'poster': f"/api/v1/posters/{movie.poster}"
+        }
+        movie_list.append(movie_data)
+    return jsonify({'movies': movie_list})
+
+
 def get_uploaded_images():
     rootdir = app.config['UPLOAD_FOLDER']
     photo_lst = []
@@ -64,6 +79,11 @@ def get_uploaded_images():
                 photo_lst.append(file)
     return photo_lst
 
+
+@app.route('/api/v1/posters/<filename>', methods=['GET'])
+def get_poster(filename):
+    rootdir = app.config['UPLOAD_FOLDER']
+    return send_from_directory(os.path.join(os.getcwd(), rootdir), filename)    
 
 
 ###
