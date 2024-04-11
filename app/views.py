@@ -51,8 +51,7 @@ def movies():
             "description": description
         }), 201
     else:
-
-        errors = form_errors(form) 
+        errors = form_errors(form)
         return jsonify({"errors": errors}), 400
 
 

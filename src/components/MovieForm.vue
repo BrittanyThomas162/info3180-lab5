@@ -1,8 +1,9 @@
 <template>
     <div>
-       <div v-if="displayFlash" class="alert" :class="{ 'alert-success': isSuccess, 'alert-danger': !isSuccess }">
-         {{ flashMessage }}
-       </div>
+        
+        <div v-if="displayFlash" class="alert" :class="{ 'alert-success': isSuccess, 'alert-danger': !isSuccess }">
+            <div v-for="(error, index) in flashMessage" :key="index">{{ error }}</div>
+        </div>
        <form @submit.prevent="saveMovie" id="movieForm">
          <div class="form-group mb-3">
            <label for="title" class="form-label">Movie Title</label>
@@ -30,6 +31,9 @@
     import { ref, onMounted } from "vue";   
     
     let csrf_token = ref("");
+    let displayFlash = ref(false);
+    let isSuccess = ref(true);
+    let flashMessage = ref([]); 
 
     function getCsrfToken() {
 
@@ -59,17 +63,40 @@
             }
         })
         .then(function (response) {
+            if (!response.ok) {
+                throw response;
+        }
             return response.json();
         })
         .then(function (data) {
             // display a success message
-            console.log(data);
+            displayFlash.value = true;
+            isSuccess.value = true;
+            flashMessage.value = [data.message];
+            
+            movieForm.reset();
+            title.value = '';
+            description.value = '';
+            poster.value = null; 
         })
         .catch(function (error) {
-            console.log(error);
+            if (error.text) {
+            error.text().then(function(errorMessage) {
+                const errorData = JSON.parse(errorMessage);
+                flashMessage.value = errorData.errors;
+                displayFlash.value = true;
+                isSuccess.value = false;
+            });
+        } else {
+            // Handle network errors or other issues
+            displayFlash.value = true;
+            isSuccess.value = false;
+            flashMessage.value = ['Failed to add movie.'];
+        }
+            
         });
-      
-    }
 
+    }
+    
 </script>
 
